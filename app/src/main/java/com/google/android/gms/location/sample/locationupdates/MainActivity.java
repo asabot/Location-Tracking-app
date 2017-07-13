@@ -18,12 +18,15 @@ package com.google.android.gms.location.sample.locationupdates;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -31,6 +34,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -90,6 +94,16 @@ public class MainActivity extends AppCompatActivity {
      */
     String lat;
     String longi;
+
+    /**
+     * Variables for managing in app storage
+     */
+
+    int key = 0;
+    String savedData = "";
+   // TextView displayAllData;
+
+
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -159,9 +173,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView mLongitudeTextView;
 
     // Labels.
-    private String mLatitudeLabel;
-    private String mLongitudeLabel;
-    private String mLastUpdateTimeLabel;
+     String mLatitudeLabel;
+    String mLongitudeLabel;
+    String mLastUpdateTimeLabel;
 
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -173,6 +187,10 @@ public class MainActivity extends AppCompatActivity {
      * Time when the location was updated represented as a String.
      */
     private String mLastUpdateTime;
+
+    Handler h = new Handler();
+    int delay = 10000;
+    Runnable runnable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -187,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
         mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
         mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
         mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
+
 
         // Set labels.
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
@@ -207,6 +226,26 @@ public class MainActivity extends AppCompatActivity {
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+
+
+
+
+
+
+
+        h.postDelayed(new Runnable() {
+            public void run() {
+
+                json2();
+
+                runnable = this;
+
+                h.postDelayed(runnable, delay);
+            }
+        }, delay);
+
+
     }
 
     /**
@@ -392,6 +431,9 @@ public class MainActivity extends AppCompatActivity {
     private void updateUI() {
         setButtonsEnabledState();
         updateLocationUI();
+        saveData();
+       // displayHistory();
+
     }
 
     /**
@@ -421,6 +463,12 @@ public class MainActivity extends AppCompatActivity {
                     mCurrentLocation.getLongitude()));
             mLastUpdateTimeTextView.setText(String.format(Locale.ENGLISH, "%s: %s",
                     mLastUpdateTimeLabel, mLastUpdateTime));
+
+            if (mCurrentLocation != null) {
+                lat = String.format(Locale.ENGLISH, "%f", mCurrentLocation.getLatitude());
+                longi = String.format(Locale.ENGLISH, "%f", mCurrentLocation.getLongitude());
+
+            }
         }
     }
 
@@ -446,6 +494,21 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+ /*   protected void onStart() {
+        h.postDelayed(new Runnable() {
+            public void run() {
+
+                json2();
+
+                runnable = this;
+
+                h.postDelayed(runnable, delay);
+            }
+        }, delay);
+
+        super.onStart();
+    }
+*/
     @Override
     public void onResume() {
         super.onResume();
@@ -623,4 +686,56 @@ public class MainActivity extends AppCompatActivity {
 
         return millisInString;
     }
+
+
+    public void saveData() {
+        TextView displayAllData = (TextView) findViewById(R.id.textView);
+        String combinedForStorage = lat + " " + longi;//.concat(" ").concat(longi);
+        displayAllData.setText(combinedForStorage);
+
+        SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(String.valueOf(key), "Blah");
+        editor.apply();
+        key++;
+
+    }
+
+    public void displayHistory(){
+        TextView displayAllData = (TextView) findViewById(R.id.textView);
+        SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
+        //String savedData = sharedPref.getString("userInputMessage", "cannot find");
+
+        savedData = "";
+        for (int i = 0; i < key; i++){
+            String savedLocation = sharedPref.getString(String.valueOf(i),"cannot find entry");
+            savedData = savedData.concat("\n").concat(savedLocation);
+        }
+
+
+        displayAllData.setMovementMethod(new ScrollingMovementMethod());
+        displayAllData.setText(savedData);
+
+        if (key == 0){
+            displayAllData.setText("nothing to show");
+
+        }
+
+    }
+
+    public void clearHistory(View view){
+        TextView displayAllData = (TextView) findViewById(R.id.textView);
+        SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear();
+        editor.apply();
+
+        key = 0;
+        savedData = "";
+
+        displayAllData.setText("Cleared");
+
+    }
+
+
 }
