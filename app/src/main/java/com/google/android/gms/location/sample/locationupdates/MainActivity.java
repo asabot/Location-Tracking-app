@@ -658,6 +658,9 @@ public class MainActivity extends AppCompatActivity {
         params.put("latitude", lat);
         params.put("longitude", longi);
 
+        params.put("username", "barkley");
+        params.put("password", "go go go jump");
+
         JsonObjectRequest req = new JsonObjectRequest(URL, new JSONObject(params),
                 new Response.Listener<JSONObject>() {
                     @Override
