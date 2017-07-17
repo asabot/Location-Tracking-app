@@ -237,7 +237,9 @@ public class MainActivity extends AppCompatActivity {
         h.postDelayed(new Runnable() {
             public void run() {
 
-                json2();
+                if ((lat != null) || (longi != null)){
+                    json2();
+                }
 
                 runnable = this;
 
@@ -431,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateUI() {
         setButtonsEnabledState();
         updateLocationUI();
-        saveData();
+
        // displayHistory();
 
     }
@@ -467,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
             if (mCurrentLocation != null) {
                 lat = String.format(Locale.ENGLISH, "%f", mCurrentLocation.getLatitude());
                 longi = String.format(Locale.ENGLISH, "%f", mCurrentLocation.getLongitude());
-
+                saveLocationData();
             }
         }
     }
@@ -691,9 +693,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void saveData() {
+    public void saveLocationData() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String millisInString  = dateFormat.format(new Date());
+        // textViewFour.setText(millisInString);
+
+
+
         TextView displayAllData = (TextView) findViewById(R.id.textView);
-        String combinedForStorage = lat + " " + longi;//.concat(" ").concat(longi);
+        String combinedForStorage = millisInString +" "+ lat + " " + longi;//.concat(" ").concat(longi);
         displayAllData.setText(combinedForStorage);
 
         SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
