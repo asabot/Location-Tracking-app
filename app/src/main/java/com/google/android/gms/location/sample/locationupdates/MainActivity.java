@@ -649,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
      * Sends a json post request to a given url with payload of HashMap
      */
     public void json2 () {
-        final String URL = "http://192.168.1.26:5000/data";
+        final String URL = "http://142.150.199.151:5000/data";
         RequestQueue queue = Volley.newRequestQueue(this);
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<String, String>();
