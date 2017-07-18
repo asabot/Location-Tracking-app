@@ -63,11 +63,13 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -238,7 +240,11 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 if ((lat != null) || (longi != null)){
-                    json2();
+                    try {
+                        json2();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 runnable = this;
@@ -650,18 +656,31 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Sends a json post request to a given url with payload of HashMap
      */
-    public void json2 () {
+    public void json2 () throws JSONException {
+        // Generate a string of params:
+        JSONObject json=new JSONObject();
+        json.put("device", android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL);
+        json.put("time", getTime());
+        json.put("latitude", lat);
+        json.put("longitude", longi);
+
+
+        ArrayList<String> things = new ArrayList<String>();
+
+        things.add(json.toString());
+
+        JSONArray list = new JSONArray(things);
+
+
         final String URL = "http://142.150.199.151:5000/data";
         RequestQueue queue = Volley.newRequestQueue(this);
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("device", android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL);
-        params.put("time", getTime());
-        params.put("latitude", lat);
-        params.put("longitude", longi);
+
 
         params.put("username", "barkley");
         params.put("password", "go go go jump");
+        params.put("query", list.toString());
 
         JsonObjectRequest req = new JsonObjectRequest(URL, new JSONObject(params),
                 new Response.Listener<JSONObject>() {
