@@ -38,6 +38,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.mkyong.android.CustomOnItemSelectedListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -122,14 +124,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+   // private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
 
     /**
      * The fastest rate for active location updates. Exact. Updates will never be more frequent
      * than this value.
      */
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+  //  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+  //          UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     // Keys for storing activity state in the Bundle.
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
@@ -174,6 +176,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
 
+    private Spinner spinner1;
+    private Button btnSubmit;
+    long delayValue=20000;
+    long fastestDelayValue = 500;
+
     // Labels.
      String mLatitudeLabel;
     String mLongitudeLabel;
@@ -217,6 +224,9 @@ public class MainActivity extends AppCompatActivity {
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
 
+        addListenerOnButton();
+        addListenerOnSpinnerItemSelection();
+
         // Update values using data stored in the Bundle.
         updateValuesFromBundle(savedInstanceState);
 
@@ -255,6 +265,64 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
+    public void addListenerOnSpinnerItemSelection() {
+        spinner1 = (Spinner) findViewById(R.id.spinner);
+        spinner1.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+    }
+    // get the selected dropdown list value
+    public void addListenerOnButton() {
+
+        spinner1 = (Spinner) findViewById(R.id.spinner);
+        btnSubmit = (Button) findViewById(R.id.button2);
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+               Toast.makeText(MainActivity.this,
+                        "INTERVAL SET TO : " + String.valueOf(spinner1.getSelectedItem()) ,
+                        Toast.LENGTH_SHORT).show();
+
+
+
+               if (String.valueOf(spinner1.getSelectedItem()).equals("1 second")){
+                    delayValue = 1000;
+                }
+                else if (String.valueOf(spinner1.getSelectedItem()).equals("5 seconds")){
+                    delayValue = 5000;
+                }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals( "10 seconds")){
+                   delayValue = 10000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("30 seconds")){
+                   delayValue = 30000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("1 minute")){
+                   delayValue = 60000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("2 minutes")){
+                   delayValue = 120000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("5 minutes")){
+                   delayValue = 300000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("10 minutes")){
+                   delayValue = 600000;
+               }
+               else if (String.valueOf(spinner1.getSelectedItem()).equals("15 minutes")){
+                   delayValue = 900000;
+               }
+                fastestDelayValue = delayValue/2;
+                TextView displayAllData = (TextView) findViewById(R.id.textView);
+                displayAllData.setText(String.valueOf(delayValue));
+                createLocationRequest();
+            }
+
+        });
+    }
+
 
     /**
      * Updates fields based on data stored in the bundle.
@@ -306,11 +374,11 @@ public class MainActivity extends AppCompatActivity {
         // inexact. You may not receive updates at all if no location sources are available, or
         // you may receive them slower than requested. You may also receive updates faster than
         // requested if other applications are requesting location at a faster interval.
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setInterval(delayValue);
 
         // Sets the fastest rate for active location updates. This interval is exact, and your
         // application will never receive updates faster than this value.
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(fastestDelayValue);
 
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }

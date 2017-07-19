@@ -33,7 +33,6 @@
     <string name="settings">Settings</string>
 
     <string-array name="time_interval_selection">
-        <item>1 second</item>
         <item>5 seconds</item>
         <item>10 seconds</item>
         <item>30 seconds</item>
