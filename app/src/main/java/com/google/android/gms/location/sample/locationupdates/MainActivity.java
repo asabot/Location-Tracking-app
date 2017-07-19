@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
     private String mLastUpdateTime;
 
     Handler h = new Handler();
-    int delay = 10000;
     Runnable runnable;
 
     @Override
@@ -259,9 +258,9 @@ public class MainActivity extends AppCompatActivity {
 
                 runnable = this;
 
-                h.postDelayed(runnable, delay);
+                h.postDelayed(runnable, delayValue);
             }
-        }, delay);
+        }, delayValue);
 
 
     }
