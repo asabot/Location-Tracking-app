@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSubmit;
     long delayValue=20000;
     long fastestDelayValue = 500;
+    ArrayList<String> stringbuff = new ArrayList<String>();
 
     // Labels.
      String mLatitudeLabel;
@@ -768,6 +769,19 @@ public class MainActivity extends AppCompatActivity {
 
 // add the request object to the queue to be executed
         queue.add(req);
+    }
+
+    /**
+     * Generates a string with json to add to the buffer for a current sensors data.
+     */
+    public String getEntry() throws JSONException {
+        JSONObject json=new JSONObject();
+        json.put("device", android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL);
+        json.put("time", getTime());
+        json.put("latitude", lat);
+        json.put("longitude", longi);
+
+        return json.toString();
     }
 
     public String getTime(){
