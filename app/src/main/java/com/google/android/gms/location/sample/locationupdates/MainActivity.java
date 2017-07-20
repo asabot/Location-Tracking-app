@@ -251,7 +251,8 @@ public class MainActivity extends AppCompatActivity {
 
                 if ((lat != null) || (longi != null)){
                     try {
-                        json2();
+                        //json2();
+                        sendData();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -262,8 +263,6 @@ public class MainActivity extends AppCompatActivity {
                 h.postDelayed(runnable, delayValue);
             }
         }, delayValue);
-
-
     }
 
 
@@ -271,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         spinner1 = (Spinner) findViewById(R.id.spinner);
         spinner1.setOnItemSelectedListener(new CustomOnItemSelectedListener());
     }
+
     // get the selected dropdown list value
     public void addListenerOnButton() {
 
@@ -722,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * Sends a json post request to a given url with payload of HashMap
+     * Sends a json post request to a given url with payload of current lat and longi
      */
     public void json2 () throws JSONException {
         // Generate a string of params:
@@ -787,29 +787,88 @@ public class MainActivity extends AppCompatActivity {
     public String getTime(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String millisInString  = dateFormat.format(new Date());
-        // textViewFour.setText(millisInString);
-
         return millisInString;
     }
 
 
     public void saveLocationData() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String millisInString  = dateFormat.format(new Date());
-        // textViewFour.setText(millisInString);
-
-
-
         TextView displayAllData = (TextView) findViewById(R.id.textView);
-        String combinedForStorage = millisInString +" "+ lat + " " + longi;//.concat(" ").concat(longi);
-        displayAllData.setText(combinedForStorage);
+        try {
+            displayAllData.setText(getEntry());
+            SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(String.valueOf(key), getEntry());
+            editor.apply();
+            key++;
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Gets data from buffer and sends it to server. Then clears data.
+     * @throws JSONException
+     */
+    public void sendData() throws JSONException {
+        // Populate the stringbuff with buffered data
+        generateStringArray();
+
+        // Generate query string
+        JSONArray list = new JSONArray(stringbuff);
+        if (list.length() != 0) {
+            postData(list.toString());
+            stringbuff.clear();
+        }
+    }
+
+
+    public void generateStringArray(){
         SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(String.valueOf(key), "Blah");
-        editor.apply();
-        key++;
 
+        savedData = "";
+        for (int i = 0; i < key; i++){
+            stringbuff.add(sharedPref.getString(String.valueOf(i),"cannot find entry"));
+             //savedData = savedData.concat("\n").concat(savedLocation);
+        }
+
+        clearHistory();
+    }
+
+
+    /**
+     * Sends a json post request to a given url with payload of query string
+     */
+    public void postData (String query) throws JSONException {
+        final String URL = "http://142.150.199.151:5000/data";
+        RequestQueue queue = Volley.newRequestQueue(this);
+        // Post params to be sent to the server
+        HashMap<String, String> params = new HashMap<>();
+
+
+        params.put("username", "barkley");
+        params.put("password", "go go go jump");
+        params.put("query", query);
+
+        JsonObjectRequest req = new JsonObjectRequest(URL, new JSONObject(params),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            VolleyLog.v("Response:%n %s", response.toString(4));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        });
+        // add the request object to the queue to be executed
+        queue.add(req);
     }
 
     public void displayHistory(){
@@ -834,7 +893,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void clearHistory(View view){
+    public void clearHistory(){
         TextView displayAllData = (TextView) findViewById(R.id.textView);
         SharedPreferences sharedPref = getSharedPreferences("dataFile", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
