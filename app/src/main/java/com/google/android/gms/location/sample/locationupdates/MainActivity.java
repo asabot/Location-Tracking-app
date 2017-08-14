@@ -740,7 +740,7 @@ public class MainActivity extends AppCompatActivity {
         JSONArray list = new JSONArray(things);
 
 
-        final String URL = "http://142.150.199.151:5000/data";
+        final String URL = "http://142.150.199.140:5000/data";
         RequestQueue queue = Volley.newRequestQueue(this);
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<String, String>();
@@ -841,7 +841,7 @@ public class MainActivity extends AppCompatActivity {
      * Sends a json post request to a given url with payload of query string
      */
     public void postData (String query) throws JSONException {
-        final String URL = "http://142.150.199.151:5000/data";
+        final String URL = "http://142.150.199.140:5000/data";
         RequestQueue queue = Volley.newRequestQueue(this);
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<>();
